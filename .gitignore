@@ -1,0 +1,11 @@
+# Filling up the database
+db_work.py
+database_fillup.py
+# The database
+db/spam_bot.db
+# token
+data/token.csv
+# Python
+data/__pycache__/
+# Plan
+plan.md

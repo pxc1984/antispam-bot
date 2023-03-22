@@ -1,0 +1,6 @@
+[libraries]
+telegram
+telegram.ext
+pandas
+asyncio
+sqlalchemy
