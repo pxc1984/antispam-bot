@@ -1,11 +1,16 @@
 # Filling up the database
 db_work.py
 database_fillup.py
-# The database
+# The databases
 db/spam_bot.db
+db/spam_bot(old).db
 # token
 data/token.csv
 # Python
 data/__pycache__/
 # Plan
 plan.md
+# Logs
+info.log
+error.log
+debug.log

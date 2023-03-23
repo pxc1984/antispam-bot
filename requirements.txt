@@ -4,3 +4,4 @@ telegram.ext
 pandas
 asyncio
 sqlalchemy
+translate
