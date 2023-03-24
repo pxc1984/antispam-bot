@@ -32,4 +32,3 @@ def create_session() -> Session:
     global __factory
     __factory.expire_on_commit = True
     return __factory()
-
