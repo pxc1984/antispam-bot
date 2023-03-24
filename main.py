@@ -24,7 +24,7 @@ except Exception:
     # TRY VERY-VERY HARD
     os.system("pip install asyncio")
     import asyncio
-import data.db_session
+from data import db_session
 try:
     import sqlalchemy as sa
     import sqlalchemy.orm as orm
@@ -49,7 +49,42 @@ except ModuleNotFoundError:
     os.system("pip install schedule")
     import schedule
 import datetime
+import json
+import sys
 
+
+EMOJIS = """😁😂😃😄😅😆😉😊😋😌😍😏😒😓😔😖😘😚😜
+😝😞😠😡😢😣😤😥😨😩😪😫😭😰😱😲😳😵😷😸😹😺😻😼😽
+😾😿🙀🙅🙆🙇🙈🙉🙊🙋🙌🙍🙎🙏✂✅✈✉✊✋✌✏✒✔✖✨✳✴❄❇❌
+❎❓❔❕❗❤➕➖➗➡➰🚀🚃🚄🚅🚇🚉🚌🚏🚑🚒🚓🚕🚗🚙🚚
+🚢🚤🚥🚧🚨🚩🚪🚫🚬🚭🚲🚶🚹🚺🚻🚼🚽🚾🛀Ⓜ🅰🅱🅾🅿🆎🆑
+🆒🆓🆔🆕🆖🆗🆘🆙🆚🇩🇪🇩🇪🇩🇪🇬🇧🇬🇧🇬🇧🇨🇳🇨🇳🇨🇳🇯🇵🇯🇵🇯🇵🇰🇷🇰🇷🇰🇷🇫🇷
+🇫🇷🇫🇷🇪🇸🇪🇸🇪🇸🇮🇹🇮🇹🇮🇹🇺🇸🇺🇸🇺🇸🇷🇺🇷🇺🇷🇺🈁🈂🈚🈯🈲🈳🈴🈵🈶🈷🈸🈹
+🈺🉐🉑©®‼⁉#⃣#⃣#⃣™ℹ↔↕↖↗↘↙↩↪⌚⌛⏩⏪⏫⏬⏰⏳▪▫▶◀◻◼◽◾☀☁
+☎☑☔☕☝☺♈♉♊♋♌♍♎♏♐♑♒♓♠♣♥♦♨♻♿⚓⚠⚡⚪⚫⚽⚾⛄⛅⛎⛔⛪⛲⛳⛵
+⛺⛽⤴⤵⬅⬆⬇⬛⬜⭐⭕〰〽㊗㊙🀄🃏🌀🌁🌂🌃🌄🌅🌆🌇🌈🌉🌊🌋
+🌌🌏🌑🌓🌔🌕🌙🌛🌟🌠🌰🌱🌴🌵🌷🌸🌹🌺🌻🌼🌽🌾🌿🍀🍁🍂
+🍃🍄🍅🍆🍇🍈🍉🍊🍌🍍🍎🍏🍑🍒🍓🍔🍕🍖🍗🍘🍙🍚🍛🍜🍝
+🍞🍟🍠🍡🍢🍣🍤🍥🍦🍧🍨🍩🍪🍫🍬🍭🍮🍯🍰🍱🍲🍳🍴🍵🍶🍷
+🍸🍹🍺🍻🎀🎁🎂🎃🎄🎅🎆🎇🎈🎉🎊🎋🎌🎍🎎🎏🎐🎑🎒🎓🎠🎡
+🎢🎣🎤🎥🎦🎧🎨🎩🎪🎫🎬🎭🎮🎯🎰🎱🎲🎳🎴🎵🎶🎷🎸🎹🎺🎻
+🎼🎽🎾🎿🏀🏁🏂🏃🏄🏆🏈🏊🏠🏡🏢🏣🏥🏦🏧🏨🏩🏪🏫🏬🏭🏮
+🏯🏰🐌🐍🐎🐑🐒🐔🐗🐘🐙🐚🐛🐜🐝🐞🐟🐠🐡🐢🐣🐤🐥🐦🐧🐨
+🐩🐫🐬🐭🐮🐯🐰🐱🐲🐳🐴🐵🐶🐷🐸🐹🐺🐻🐼🐽🐾👀👂👃👄👅
+👆👇👈👉👊👋👌👍👎👏👐👑👒👓👔👕👖👗👘👙👚👛👜👝👞👟
+👠👡👢👣👤👦👧👨👩👪👫👮👯👰👱👲👳👴👵👶👷👸👹👺👻👼
+👽👾👿💀💁💂💃💄💅💆💇💈💉💊💋💌💍💎💏💐💑💒💓💔💕💖
+💗💘💙💚💛💜💝💞💟💠💡💢💣💤💥💦💧💨💩💪💫💬💮💯💰💱
+💲💳💴💵💸💹💺💻💼💽💾💿📀📁📂📃📄📅📆📇📈📉📊📋📌📍
+📎📏📐📑📒📓📔📕📖📗📘📙📚📛📜📝📞📟📠📡📢📣📤📥📦📧
+📨📩📪📫📮📰📱📲📳📴📶📷📹📺📻📼🔃🔊🔋🔌🔍🔎🔏🔐🔑🔒
+🔓🔔🔖🔗🔘🔙🔚🔛🔜🔝🔞🔟🔠🔡🔢🔣🔤🔥🔦🔧🔨🔩🔪🔫🔮🔯
+🔰🔱🔲🔳🔴🔵🔶🔷🔸🔹🔺🔻🔼🔽🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛
+🗻🗼🗽🗾🗿😀😇😈😎😐😑😕😗😙😛😟😦😧😬😮😯😴😶🚁🚂🚆
+🚈🚊🚍🚎🚐🚔🚖🚘🚛🚜🚝🚞🚟🚠🚡🚣🚦🚮🚯🚰🚱🚳🚴🚵🚷🚸
+🚿🛁🛂🛃🛄🛅🌍🌎🌐🌒🌖🌗🌘🌚🌜🌝🌞🌲🌳🍋🍐🍼🏇🏉🏤🐀
+🐁🐂🐃🐄🐅🐆🐇🐈🐉🐊🐋🐏🐐🐓🐕🐖🐪👥👬👭💭💶💷📬📭📯
+📵🔀🔁🔂🔄🔅🔆🔇🔉🔕🔬🔭🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧"""
 
 # Clear log files for the simplicity
 with open("info.log", "w"):
@@ -311,9 +346,9 @@ async def config_stop(update, context):  # 0 -status
     logging.info("0")
     session = db_session.create_session()
     
-    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, default configuration will be applied to the current group! The default configuration is {config['max_messages']} messages per minute and mute duration of {config['mute_duration']} minutes"))
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, default configuration will be applied to the current group! The default configuration is {int(config['max_messages'])} messages per minute and mute duration of {int(config['mute_duration'])} minutes"), reply_markup=ReplyKeyboardRemove())
     
-    group = session.query(Group).filter(Group.id == chat_id)
+    group = session.query(Group).filter(Group.id == update.message.chat.id)
     if not group:
         group = Group(id=update.message.chat.id, is_forum=update.message.chat.is_forum, max_messages=config['max_messages'], mute_duration=mute_duration, title=update.message.chat.title)
         session.add(group)
@@ -329,13 +364,18 @@ async def starting_config(update, context):  # 3 -status
     logging.info("3")
     if update.message.text == "✅":
         return 1
-    elif update.message.text == "⛔":
+    elif update.message.text == "⛔️":
+        await config_stop(update, context)
         return ConversationHandler.END
 
 
 async def first_response_config(update, context):  # 1 -status
     logging.info("1")
     session = db_session.create_session()
+    
+    if update.message.text.strip() == "⛔️":
+        await config_stop(update, context)
+        return ConversationHandler.END
     
     reply_keyboard = [["2", "3", "5"], ["10", "15", "20"], ["30", "40", "60"], ["⛔"]]
     markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -351,8 +391,9 @@ async def second_response_config(update, context):  # 2 -status
     try:
         max_messages = int(str(update.message.text).strip())
     except Exception as e:
-        await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Something is wrong. This isn't integer at all!!!"))
+        await config_stop(update, context)
         return ConversationHandler.END
+    
     group = add_group_to_db(update, context)
     session.add(group)
     group.max_messages = max_messages
@@ -371,13 +412,13 @@ async def third_response_config(update, context):  # 4 -status
     try:
         mute_duration = int(str(update.message.text).strip())
     except Exception as e:
-        await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Something is wrong. This isn't integer at all!!!!"))
+        await config_stop(update, context)
         return ConversationHandler.END
     group = add_group_to_db(update, context)
     session.add(group)
     group.mute_duration = mute_duration
     
-    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, everything is set up! Now I will follow this configuration:\n\t\t· {group.max_messages} - max messages per minute\n\t\t· {group.mute_duration} - mute duration"), reply_markup=ReplyKeyboardRemove())
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, everything is set up! Now I will follow this configuration:\n\t\t·{group.max_messages} max messages per minute\n\t\t·{group.mute_duration} minutes mute duration"), reply_markup=ReplyKeyboardRemove())
     session.commit()
     return ConversationHandler.END
 
@@ -387,6 +428,36 @@ async def check_admin(update, context):
     if type(chat_member) in [ChatMemberAdministrator, ChatMemberOwner]:
         return True
     return False
+
+
+def has_too_many_emojis(text, threshold=0.8):
+    """
+    Checks if a message has too many emojis.
+    Returns True if the percentage of emojis in the text
+    is greater than or equal to the specified threshold, False otherwise.
+    """
+    emoji_count = sum([1 for c in text if c in EMOJIS])
+    total_chars = len(text)
+    if total_chars == 1:
+        return False
+    emoji_ratio = emoji_count / total_chars
+    return emoji_ratio >= threshold
+
+
+
+def has_too_many_caps(text, threshold=0.7):
+    """
+    Checks if a message has too many capitalized letters.
+    Returns True if the percentage of capitalized letters in the text
+    is greater than or equal to the specified threshold, False otherwise.
+    """
+    text.replace(' ', '')
+    caps_count = sum([1 for c in text if c.isupper()])
+    total_chars = len(text)
+    caps_ratio = caps_count / total_chars
+    if caps_ratio == 1.0:
+        return False  # You wouldn't understand.... Sometimes you need to go into battle-mode
+    return caps_ratio >= threshold
 
 
 async def check_spam(update, context):
@@ -418,6 +489,13 @@ async def check_spam(update, context):
                 await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, f"You better don't use word {spam_word.word}"))
                 if not is_admin:
                     usr.weight += spam_word.weight
+
+        if has_too_many_caps(update.message.text):
+            await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
+            await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained too many capitalized letters"))
+        elif has_too_many_emojis(update.message.text):
+            await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
+            await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained too many emojis"))
     
     elif update.message.sticker:  # If a message is a sticker
         if not is_admin:
@@ -461,7 +539,7 @@ async def add_spam_word(update, context):
     try: 
         spam_word_weight = int(context.args[1])
     except ValueError:
-        await context.bot.send_messag(chat_id=int(config['pro_id']), text=translate_to_lang(update, "incorrect format for a weight of a spam word"))
+        await context.bot.send_message(chat_id=int(config['pro_id']), text=translate_to_lang(update, "incorrect format for a weight of a spam word"))
         return 0
     word = session.query(SpamWords).filter(SpamWords.word == spam_word).first()
     if not word:
@@ -473,6 +551,16 @@ async def add_spam_word(update, context):
         return 0
     session.commit()
     return 1
+
+
+async def load_json(update, context):
+    """
+    This function should define if a file is called "config.json" or "config.csv"
+    and load this config
+    else it should raise up check_spam function
+    this function isn't written now
+    """
+    await check_spam(update, context)
 
 
 def clear_weight():
@@ -487,6 +575,12 @@ def clear_weight():
 
 def error(update, context):
     logging.error('Update "%s" caused error "%s"', update, context.error)
+
+
+async def stop_bot(update, context):
+    """This is a dev function to easily restart bot on a docker-server"""
+    if update.message.from_user.id == int(config['pro_id']) and update.message.chat.type == "private":
+        sys.exit(1)
 
 
 # Define main function
@@ -506,7 +600,7 @@ def main():
         fallbacks=[
             CommandHandler("stop_cfg", config_stop),
             MessageHandler("STOP", config_stop),
-            MessageHandler("⛔", config_stop)
+            MessageHandler("⛔️", config_stop)
         ]
     )
     
@@ -516,10 +610,12 @@ def main():
     # Add handlers
     application.add_handlers([
         config_handler,  # Better config editor
+        MessageHandler(filters.ATTACHMENT & ~filters.TEXT & ~filters.COMMAND & ~filters.PHOTO, load_json),  # load json
         CommandHandler("start", start_command),
         CommandHandler("help", help_command),
         CommandHandler("settings", settings),
         CommandHandler("add_spam_word", add_spam_word),
+        CommandHandler("stop", stop_bot),
         MessageHandler(filters.ALL & ~filters.COMMAND, check_spam)
         # MessageHandler(filters.ALL, error)
     ])
@@ -529,6 +625,8 @@ def main():
     
     # Start removing weight
     schedule.every(1).minutes.do(clear_weight)
+    
+    
 
 
 if __name__ == '__main__':
