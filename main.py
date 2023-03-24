@@ -43,6 +43,12 @@ try:
 except ModuleNotFoundError:
     os.system("pip install translate")
     from translate import Translator
+try:
+    import schedule
+except ModuleNotFoundError:
+    os.system("pip install schedule")
+    import schedule
+import datetime
 
 
 # Clear log files for the simplicity
@@ -245,7 +251,7 @@ async def settings(update, context):
             return 
         
         # Update the settings for the group in the database
-        # I'm not using the predefined function called ad_group_to_db because I am changing params in action
+        # I'm not using the predefined function called add_group_to_db because I am changing params in action
         group = session.query(Group).filter(Group.id == chat_id).first()
         session.add(group)
         if not group:
@@ -264,9 +270,23 @@ async def settings(update, context):
     
     # If the message was sent in a private chat, inform the user that they cannot use this command
     else:
-        if user_id == int(config['pro_id']):  # My bypass :3
-            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "YES, MY MASTER, YOU CAN DO EVERYTHING WITH ME. \nAHHHHH!!!!!\nBUT YOU ALSO CAN'T UPDATE GLOBAL SETTINGS!!\nnyeh-heh-heh\nNYEH-HEH-HEH!"))
-        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "You cannot edit the global settings of this bot."))
+        if user_id == int(config['pro_id']):  # My bypass :3 It allows to edit global settings in action
+            try:
+                max_messages = int(context.args[0])
+                mute_duration = int(context.args[1])
+                if max_messages <= 0 or mute_duration <= 0:
+                    raise ValueError()
+            except ValueError:
+                await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "Invalid arguments. Please provide two positive integers. Arguments should be positive."), reply_to_message_id=update.message.message_id)
+                return
+            except IndexError:
+                await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "Invalid arguments. Please provide two positive integers. They should follow the following format:\n\t\t/settings [max_messages] [mute_duration]"), reply_to_message_id=update.message.message_id)
+                return 
+            config['max_messages'] = max_messages
+            config['mute_duration'] = mute_duration
+            config.to_csv("data/config.csv")
+            load_config()
+        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, f"Current settings are:\n\t\t· {int(config['max_messages'])} max messages per minute\n\t\t· {int(config['mute_duration'])} minutes mute duration"))
     session.commit()
     return 1
         
@@ -455,6 +475,16 @@ async def add_spam_word(update, context):
     return 1
 
 
+def clear_weight():
+    session = db_session.create_session()
+    all_users = session.query(Users).all()
+    session.add(all_users)
+    for user in all_users:
+        user.weight = 0
+    session.commit()
+    return 1
+
+
 def error(update, context):
     logging.error('Update "%s" caused error "%s"', update, context.error)
 
@@ -485,7 +515,7 @@ def main():
 
     # Add handlers
     application.add_handlers([
-        config_handler,
+        config_handler,  # Better config editor
         CommandHandler("start", start_command),
         CommandHandler("help", help_command),
         CommandHandler("settings", settings),
@@ -496,6 +526,9 @@ def main():
 
     # Start the bot
     application.run_polling()
+    
+    # Start removing weight
+    schedule.every(1).minutes.do(clear_weight)
 
 
 if __name__ == '__main__':
