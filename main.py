@@ -107,129 +107,6 @@ def load_token():
 load_config()
 load_token()
 
-"""
-GIF:
-Update(
-    message=Message(
-        animation=Animation(
-            duration=6, 
-            file_id='CgACAgQAAxkBAAOBZBvgVSOj6mKt6D98zoJgOHZWH5EAAukCAAIlYXxSh9P9nlaQIqwvBA', 
-            file_name='mp4.mp4', 
-            file_size=76345, 
-            file_unique_id='AgAD6QIAAiVhfFI', 
-            height=122, 
-            mime_type='video/mp4', 
-            width=166), 
-        channel_chat_created=False, 
-        chat=Chat(
-            first_name='PhantomPixie', 
-            id=6258736196, 
-            type=<ChatType.PRIVATE>, 
-            username='phantom_pixie'), 
-        date=datetime.datetime(2023, 3, 23, 5, 15, 1, tzinfo=<UTC>), 
-        delete_chat_photo=False, 
-        document=Document(
-            file_id='CgACAgQAAxkBAAOBZBvgVSOj6mKt6D98zoJgOHZWH5EAAukCAAIlYXxSh9P9nlaQIqwvBA', 
-            file_name='mp4.mp4', 
-            file_size=76345, 
-            file_unique_id='AgAD6QIAAiVhfFI', 
-            mime_type='video/mp4'), 
-        from_user=User(
-            first_name='PhantomPixie', 
-            id=6258736196, 
-            is_bot=False, 
-            language_code='en', 
-            username='phantom_pixie'), 
-            group_chat_created=False, 
-            message_id=129, 
-            supergroup_chat_created=False), 
-        update_id=326301465)
-STICKER:
-message=Message(
-    channel_chat_created=False, 
-    chat=Chat(
-        first_name='-y', 
-        id=774301386, 
-        type=<ChatType.PRIVATE>, 
-        username='igamamaev'), 
-    date=datetime.datetime(2023, 3, 23, 5, 31, 23, tzinfo=<UTC>), 
-    delete_chat_photo=False, 
-    from_user=User(
-        first_name='-y', 
-        id=774301386, is_bot=False, 
-        language_code='en', 
-        username='igamamaev'), 
-    group_chat_created=False, 
-    message_id=138, 
-    sticker=Sticker(
-        api_kwargs={'thumbnail': {'file_id': 'AAMCAgADGQEAA4pkG-QrLp0KWbL5KAABC3tYwD5hhQEAAh8OAAIUavhInRN6ucIJPC8BAAdtAAMvBA', 'file_unique_id': 'AQADHw4AAhRq-Ehy', 'file_size': 7104, 'width': 209, 'height': 320}}, 
-        emoji='🛸', 
-        file_id='CAACAgIAAxkBAAOKZBvkKy6dClmy-SgAAQt7WMA-YYUBAAIfDgACFGr4SJ0TernCCTwvLwQ', 
-        file_size=13080, 
-        file_unique_id='AgADHw4AAhRq-Eg', 
-        height=512, 
-        is_animated=False, 
-        is_video=False, 
-        set_name='snusik_by_favstickbot', 
-        thumb=PhotoSize(
-            file_id='AAMCAgADGQEAA4pkG-QrLp0KWbL5KAABC3tYwD5hhQEAAh8OAAIUavhInRN6ucIJPC8BAAdtAAMvBA', 
-            file_size=7104, 
-            file_unique_id='AQADHw4AAhRq-Ehy', 
-            height=320, width=209), 
-            type='regular', 
-            width=334), 
-        supergroup_chat_created=False), 
-    update_id=326301481
-)
-IMAGE:
-Update(
-    message=Message(
-        channel_chat_created=False, 
-        chat=Chat(
-            first_name='PhantomPixie', 
-            id=6258736196, 
-            type=<ChatType.PRIVATE>, 
-            username='phantom_pixie'), 
-        date=datetime.datetime(2023, 3, 23, 5, 25, 42, tzinfo=<UTC>), 
-        delete_chat_photo=False, 
-        from_user=User(
-            first_name='PhantomPixie', 
-            id=6258736196, 
-            is_bot=False, 
-            language_code='en', 
-            username='phantom_pixie'), 
-        group_chat_created=False, 
-        message_id=137, 
-        photo=(
-            PhotoSize(
-                file_id='AgACAgUAAxkBAAOJZBvi1msYfHO4Gdv2LUgEMjpzGKsAAv65MRv-R9lU0RWwgQrP_poBAAMCAANzAAMvBA', 
-                file_size=1079, 
-                file_unique_id='AQAD_rkxG_5H2VR4', 
-                height=90, 
-                width=85), 
-            PhotoSize(
-                file_id='AgACAgUAAxkBAAOJZBvi1msYfHO4Gdv2LUgEMjpzGKsAAv65MRv-R9lU0RWwgQrP_poBAAMCAANtAAMvBA', 
-                file_size=21842, 
-                file_unique_id='AQAD_rkxG_5H2VRy', 
-                height=320, 
-                width=303), 
-            PhotoSize(
-                file_id='AgACAgUAAxkBAAOJZBvi1msYfHO4Gdv2LUgEMjpzGKsAAv65MRv-R9lU0RWwgQrP_poBAAMCAAN5AAMvBA', 
-                file_size=87513, 
-                file_unique_id='AQAD_rkxG_5H2VR-', 
-                height=815, 
-                width=772), 
-            PhotoSize(
-                file_id='AgACAgUAAxkBAAOJZBvi1msYfHO4Gdv2LUgEMjpzGKsAAv65MRv-R9lU0RWwgQrP_poBAAMCAAN4AAMvBA', 
-                file_size=92048, 
-                file_unique_id='AQAD_rkxG_5H2VR9', 
-                height=800, 
-                width=758)), 
-        supergroup_chat_created=False), 
-    update_id=326301480
-)
-"""
-
 
 def translate_to_lang(update, message):
     to_lang = update.message.from_user.language_code
@@ -261,26 +138,30 @@ def add_user_to_db(update, context):
 
 
 def add_group_to_db(update, context):
-    if update.message.chat.type != "private":
-        session = db_session.create_session()
+    try:
+        if update.message.chat.type != "private":
+            session = db_session.create_session()
 
-        group = session.query(Group).filter(Group.id == update.message.chat.id).first()
+            group = session.query(Group).filter(Group.id == update.message.chat.id).first()
 
-        if not group:
-            group = Group(
-                id=int(update.message.chat.id),
-                is_forum=bool(update.message.chat.is_forum),
-                title=str(update.message.chat.title),
-                max_messages=int(config['max_messages']),
-                mute_duration=int(config['mute_duration'])
-                )
-            session.add(group)
-            logging.info(f"added {update.message.chat.title} to db")
-            session.commit()
-        return group
-    else:
-        logging.info(f"failed adding private chat to db")
-        return 
+            if not group:
+                group = Group(
+                    id=int(update.message.chat.id),
+                    is_forum=bool(update.message.chat.is_forum),
+                    title=str(update.message.chat.title),
+                    max_messages=int(config['max_messages']),
+                    mute_duration=int(config['mute_duration'])
+                    )
+                session.add(group)
+                logging.info(f"added {update.message.chat.title} to db")
+                session.commit()
+            return group
+        else:
+            logging.info(f"failed adding private chat to db")
+            return False
+    except Exception as e:
+        logging.info(e.__repr__())
+        return False
 
 
 async def start_command(update, context):
@@ -327,7 +208,7 @@ async def settings(update, context):
     # Check if the message was sent in a group chat
     if update.effective_chat.type != "private":
         # My bypass :3
-        if user_id == int(config['pro_id']):
+        if user_id == int(config['pro_id']) and not await check_admin(update, context):
             group = session.query(Group).filter(Group.id == chat_id)
             if not group:
                 group = Group(id=chat_id, max_messages=config['max_messages'], mute_duration=mute_duration)
@@ -351,7 +232,7 @@ async def settings(update, context):
         # Check if the user is an admin of the group chat
         chat_member = await context.bot.get_chat_member(chat_id, user_id)
         if type(chat_member) not in [ChatMemberAdministrator, ChatMemberOwner]:
-            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "You need to be an admin of this group to use this command."), reply_to_message=update.message.message_id)
+            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "You need to be an admin of this group to use this command."), reply_to_message_id=update.message.message_id)
             return
         
         # Check if the arguments are valid
@@ -361,20 +242,30 @@ async def settings(update, context):
             if max_messages <= 0 or mute_duration <= 0:
                 raise ValueError()
         except ValueError:
-            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "Invalid arguments. Please provide two positive integers."))
+            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "Invalid arguments. Please provide two positive integers. Arguments should be positive."), reply_to_message_id=update.message.message_id)
             return
+        except IndexError:
+            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "Invalid arguments. Please provide two positive integers. They should follow the following format:\n\t\t/settings [max_messages] [mute_duration]"), reply_to_message_id=update.message.message_id)
+            return 
         
         # Update the settings for the group in the database
-        group = session.query(Group).get(chat_id)
+        # I'm not using the predefined function called ad_group_to_db because I am changing params in action
+        group = session.query(Group).filter(Group.id == chat_id)
         if not group:
-            group = Group(id=chat_id, max_messages=max_messages, mute_duration=mute_duration)
+            group = Group(
+                    id=int(update.message.chat.id),
+                    is_forum=bool(update.message.chat.is_forum),
+                    title=str(update.message.chat.title),
+                    max_messages=int(max_messages),
+                    mute_duration=int(mute_duration)
+                    )
             session.add(group)
         else:
             group.max_messages = max_messages
             group.mute_duration = mute_duration
         session.commit()
         
-        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, f"Settings for this group successfully updated!\nNew settings are {max_messages} max messages and mute duration of {mute_duration}!"))
+        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, f"Settings for this group successfully updated!\nNew settings are {max_messages} max messages and mute duration of {mute_duration} minutes!"))
     
     # If the message was sent in a private chat, inform the user that they cannot use this command
     else:
@@ -423,48 +314,61 @@ async def check_spam(update, context):
     if update.message.chat.type == "private":  # User is writing in private -> I don't filter and just say him to add me to a group in order for me to work properly
         await start_command(update, context)
         logging.info("user was writing in private")
-        return 0
+        return 
 
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
     
+    usr = add_user_to_db(update, context)
+    
     if update.message.text:  # If a message is text
-        usr = add_user_to_db(update, context)
-        
         spam_words = session.query(SpamWords).all()
         
         for spam_word in spam_words:
             if spam_word.word in update.message.text.lower().split(' '):
-                await context.bot.delete-message(chat_id=update.message.chat.id, message_id=update.message.message_id)  # This is done in current chat
-                await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained spam and has been deleted."))  # This is done in private message to a user
+                await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)  # This is done in current chat
+                await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained spam and has been deleted."), reply_to_message_id=update.message.message_id)  # This is done in private message to a user
                 logging.info("deleted a message")
                 if not check_admin(update, context):
                     usr.weight += spam_word.weight
-        session.commit()
 
-        if not await check_admin(update, context):
-            usr.weight += 1
+        try:
+            if not await check_admin(update, context):
+                usr.weight += 1
+        except Exception as e:
+            logging.info(e.__repr__())
+        session.commit()
+        logging.info('text')
     
     elif update.message.sticker:  # If a message is a sticker
-        if update.messagte.sticker.is_animated:
+        if update.message.sticker.is_animated:
             usr.weight += 1
         usr.weight += 1
+        logging.info('sticker')
+        # await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
     elif update.message.animation:  # If a message is a gif
         usr.weight += 2
+        # await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
+        logging.info('gif')
     elif update.message.photo:
-        pass
+        logging.info('photo')
     else:
-        pass
-    
+        logging.info('IF YOU SEE THIS MESSAGE, SOMETHING IS WRONG. YOU HAVE SUCCSESSFULLY BROKEN MY BOT.\nThere might be another type of message, which isn\'t prosessed properly')
+        
+    logging.info(f"{current_group.max_messages} -> {usr.weight}")
     if usr.weight > current_group.max_messages:
+        logging.info(f'trying to punish {update.message.from_user.username}')
         try:
             if not check_admin(update, context):
                 await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user_id, until_date=int(time.time() + mute_duration * 60), permissions=None)
+                usr.weight = 0
+                logging.info(f"I have changed weight of a user to zero, now he is ok")
                 logging.info(f"muted {user_id} for {current_group.mute_duration} minutes")
                 logging.info(f"now weight for {user_id} is {usr.weight}")
             else:
                 logging.info(f"admin of a group tries to spam but he can't be muted :(")
-            usr.weight = 0
+                usr.weight = 0
+                logging.info(f"Because a user is an admin, I have removed his weight")
         except Exception as e:
             logging.info(e.__repr__())
         await context.bot.send_message(chat_id=user_id, text=translate_to_lang(update, "You have been muted for {} minutes for spamming. Please make sure to read the group rules and avoid sending too many messages in a single chat session.".format(current_group.mute_duration)))
@@ -485,8 +389,8 @@ def main():
         CommandHandler("start", start_command),
         CommandHandler("help", help_command),
         CommandHandler("settings", settings),
-        MessageHandler(filters.TEXT & ~filters.COMMAND, check_spam),
-        MessageHandler(filters.ALL, error)
+        MessageHandler(filters.ALL & ~filters.COMMAND, check_spam),
+        # MessageHandler(filters.ALL, error)
     ])
 
     # Start the bot
