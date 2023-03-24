@@ -131,7 +131,6 @@ def add_user_to_db(update, context):
         session.add(usr)
         logging.info(f"added {update.message.from_user.username} to db")
     session.commit()
-    session.close()
     return usr
 
 
@@ -153,7 +152,6 @@ def add_group_to_db(update, context):
                 session.add(group)
                 logging.info(f"added {update.message.chat.title} to db")
             session.commit()
-            session.close()
             return group
         else:
             logging.info(f"failed adding private chat to db")
@@ -273,30 +271,95 @@ async def settings(update, context):
     return 1
         
 
-async def config_update(update, context):
-    chat_id = update.effective_chat.id
-    user_id = update.message.from_user.id
-    session = db_session.create_session()
-    if update.message.document.mime_type == 'text/csv':
-        try:
-            file_id = update.message.document.file_id
-            new_config_file = await context.bot.get_file(file_id)
-            new_config = pd.read_csv(new_config_file)
-        except Exception as e:
-            await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, f"The configuration is wrong. The error \'{e}\' has happend. Check if the file is .csv"))
-        global config, max_messages, mute_duration
-        config = new_config
-        max_messages = config['max_messages'].iloc[0]
-        mute_duration = config['mute_duration'].iloc[0]
-        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "The bot configuration has been updated."))
-        logging.info(f"Bot configuration has been updated by {user_id}")
-    else:
-        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "The file you sent is not a CSV file."))
-        logging.info(
-            f"{user_id} attempted to update bot configuration with a non-CSV file.")
-        return 0
-    session.commit()
+async def config_update(update, context):  # nan -status
+    logging.info("begin")
+    user_id: int = update.message.from_user.id
+    chat_id: int = update.message.chat.id
+    is_admin: bool = await check_admin(update, context)
+    
+    if update.message.chat.type == "private" and update.message.from_user.id != int(config['pro_id']):
+        await context.bot.send_message(chat_id=chat_id, text=translate_to_lang(update, "You have to use this command in a group. You can add me to a group just simply inviting me to it. You will also have to grant me admin priveleges in order for this bot to function properly."))
+        return ConversationHandler.END
+    
+    reply_keyboard = [[translate_to_lang(update, "✅"), translate_to_lang(update, "⛔️")]]
+    markup = ReplyKeyboardMarkup(reply_keyboard)
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, "To configure this bot for the current group you have to answer to some questions related to this. Continue? "), reply_markup=markup)
     return 1
+
+
+async def config_stop(update, context):  # 0 -status
+    logging.info("0")
+    session = db_session.create_session()
+    
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, default configuration will be applied to the current group! The default configuration is {config['max_messages']} messages per minute and mute duration of {config['mute_duration']} minutes"))
+    
+    group = session.query(Group).filter(Group.id == chat_id)
+    if not group:
+        group = Group(id=update.message.chat.id, is_forum=update.message.chat.is_forum, max_messages=config['max_messages'], mute_duration=mute_duration, title=update.message.chat.title)
+        session.add(group)
+    else:
+        group.max_messages = config['max_messages']
+        mute_duration = config['mute_duration']
+    
+    session.commit()
+    return ConversationHandler.END
+
+
+async def starting_config(update, context):  # 3 -status
+    logging.info("3")
+    if update.message.text == "✅":
+        return 1
+    elif update.message.text == "⛔":
+        return ConversationHandler.END
+
+
+async def first_response_config(update, context):  # 1 -status
+    logging.info("1")
+    session = db_session.create_session()
+    
+    reply_keyboard = [["2", "3", "5"], ["10", "15", "20"], ["30", "40", "60"], ["⛔"]]
+    markup = ReplyKeyboardMarkup(reply_keyboard)
+    
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"First you have to specify, how much messages per minute is normal"), reply_markup=markup)
+    session.commit()
+    return 2
+
+
+async def second_response_config(update, context):  # 2 -status
+    logging.info("2")
+    session = db_session.create_session()
+    try:
+        max_messages = int(str(update.message.text).strip())
+    except Exception as e:
+        await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Something is wrong. This isn't integer at all!!!"))
+        return ConversationHandler.END
+    group = add_group_to_db(update, context)
+    session.add(group)
+    group.max_messages = max_messages
+    
+    reply_keyboard = [["1", "2", "3"], ["5", "10", "15"], ["30", "45", "60"], ["⛔"]]
+    markup = ReplyKeyboardMarkup(reply_keyboard)
+    
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Then, for how long do I have to mute spammers? (in minutes)"), reply_markup=markup)
+    session.commit()
+    return 4
+
+
+async def third_response_config(update, context):  # 4 -status
+    logging.info("4")
+    session = db_session.create_session()
+    try:
+        mute_duration = int(str(update.message.text).strip())
+    except Exception as e:
+        await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Something is wrong. This isn't integer at all!!!!"))
+        return ConversationHandler.END
+    group = add_group_to_db(update, context)
+    session.add(group)
+    group.mute_duration = mute_duration
+    
+    await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, f"Ok, everything is set up! Now I will follow this configuration:\n\t\t· {group.max_messages} - max messages per minute\n\t\t· {group.mute_duration} - mute duration"), reply_markup=ReplyKeyboardRemove())
+    session.commit()
+    return ConversationHandler.END
 
 
 async def check_admin(update, context):
@@ -307,6 +370,7 @@ async def check_admin(update, context):
 
 
 async def check_spam(update, context):
+    logging.info("check-spam")
     session = db_session.create_session()
     
     current_group = add_group_to_db(update, context)
@@ -328,43 +392,31 @@ async def check_spam(update, context):
         spam_words: list = session.query(SpamWords).all()
         
         for spam_word in spam_words:
-            if spam_word.word in update.message.text.lower().replace(',', ''). replace('.', '').replace(':', '').replace('!', '').replace('?', '').replace('/', '').split(' '):
+            if spam_word.word in update.message.text.lower().replace(',', ''). replace('.', '').replace(':', '').replace('!', '').replace('?', '').replace('/', ''):
                 await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)  # This is done in current chat
                 await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained spam and has been deleted."))  # This is done in private message to a user
                 await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, f"You better don't use word {spam_word.word}"))
-                logging.info("deleted a message")
                 if not is_admin:
                     usr.weight += spam_word.weight
-                    
-        logging.info('text')
     
     elif update.message.sticker:  # If a message is a sticker
         if not is_admin:
             if update.message.sticker.is_animated:
                 usr.weight += 1
             usr.weight += 1
-        logging.info('sticker')
-        # await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
     elif update.message.animation:  # If a message is a gif
         if not is_admin:
             usr.weight += 1
-        logging.info('gif')
     elif update.message.photo:
-        logging.info('photo')
+        pass
     else:
         logging.info('IF YOU SEE THIS MESSAGE, SOMETHING IS WRONG. YOU HAVE SUCCSESSFULLY BROKEN MY BOT.\nThere might be another type of message, which isn\'t prosessed properly')
     
-    logging.info(f"{current_group.max_messages} -> {usr.weight}")
     if usr.weight > current_group.max_messages:
-        logging.info(f'trying to punish {update.message.from_user.username}')
         try:
             if not await check_admin(update, context):
                 await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user_id, until_date=int(time.time() + current_group.mute_duration * 60), permissions=None)
-                logging.info(f"muted {update.message.from_user.username} for {current_group.mute_duration} minutes")
-            else:
-                logging.info(f"admin of a group tries to spam but he can't be muted :(")
             usr.weight = 0
-            logging.info(f"now weight for {update.message.from_user.username} is {usr.weight}")
         except Exception as e:
             logging.info(e.__repr__())
             return 0
@@ -377,7 +429,6 @@ async def add_spam_word(update, context):
     session = db_session.create_session()
     is_admin = await check_admin(update, context)
     if update.message.from_user.id != int(config['pro_id']) or update.effective_chat.type != "private":  # editing global config
-        logging.info('not enough rights')
         await context.bot.send_message(chat_id=update.message.chat.id, text=translate_to_lang(update, "you don't have enough rights to edit global config of a bot"), reply_to_message_id=update.message.message_id)
         return 0
     try:
@@ -385,13 +436,11 @@ async def add_spam_word(update, context):
         spam_word.replace('\"', '')
         spam_word.replace('\'', '')
     except TypeError or ValueError:
-        logging.info("taken incorrect spam_word")
         await context.bot.send_message(chat_id=int(config['pro_id']), text=translate_to_lang(update, "incorrect format for a spam_word"))
         return 0
     try: 
         spam_word_weight = int(context.args[1])
     except ValueError:
-        logging.info("taken incorrect weight")
         await context.bot.send_messag(chat_id=int(config['pro_id']), text=translate_to_lang(update, "incorrect format for a weight of a spam word"))
         return 0
     word = session.query(SpamWords).filter(SpamWords.word == spam_word).first()
@@ -400,7 +449,6 @@ async def add_spam_word(update, context):
         session.add(word)
         await context.bot.send_message(chat_id=int(config['pro_id']), text=translate_to_lang(update, f"successfully added word {spam_word}"))
     else:
-        logging.info("word already present")
         await context.bot.send_message(chat_id=int(config['pro_id']), text=translate_to_lang(update, "this word already present in the database"))
         return 0
     session.commit()
@@ -413,16 +461,36 @@ def error(update, context):
 
 # Define main function
 def main():
+    config_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler("cfg", config_update), 
+            CommandHandler("configure", config_update), 
+            CommandHandler("config", config_update)
+        ], 
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, first_response_config)],
+            2: [MessageHandler(filters.TEXT & ~filters.COMMAND, second_response_config)],
+            3: [MessageHandler(filters.TEXT & ~filters.COMMAND, starting_config)],
+            4: [MessageHandler(filters.TEXT & ~filters.COMMAND, third_response_config)]
+        }, 
+        fallbacks=[
+            CommandHandler("stop_cfg", config_stop),
+            MessageHandler("STOP", config_stop),
+            MessageHandler("⛔", config_stop)
+        ]
+    )
+    
     queue = asyncio.Queue(maxsize=100)
     application = Application.builder().token(token=TOKEN).build()
 
     # Add handlers
     application.add_handlers([
+        config_handler,
         CommandHandler("start", start_command),
         CommandHandler("help", help_command),
         CommandHandler("settings", settings),
         CommandHandler("add_spam_word", add_spam_word),
-        MessageHandler(filters.ALL & ~filters.COMMAND, check_spam),
+        MessageHandler(filters.ALL & ~filters.COMMAND, check_spam)
         # MessageHandler(filters.ALL, error)
     ])
 
