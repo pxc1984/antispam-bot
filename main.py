@@ -131,6 +131,7 @@ def add_user_to_db(update, context):
         session.add(usr)
         logging.info(f"added {update.message.from_user.username} to db")
     session.commit()
+    session.close()
     return usr
 
 
@@ -152,6 +153,7 @@ def add_group_to_db(update, context):
                 session.add(group)
                 logging.info(f"added {update.message.chat.title} to db")
             session.commit()
+            session.close()
             return group
         else:
             logging.info(f"failed adding private chat to db")
@@ -246,7 +248,7 @@ async def settings(update, context):
         
         # Update the settings for the group in the database
         # I'm not using the predefined function called ad_group_to_db because I am changing params in action
-        group = session.query(Group).filter(Group.id == chat_id)
+        group = session.query(Group).filter(Group.id == chat_id).first()
         session.add(group)
         if not group:
             group = Group(
@@ -313,14 +315,14 @@ async def check_spam(update, context):
         logging.info("user was writing in private")
         return 
 
-    session.add(current_group)
-
     user_id: int = update.message.from_user.id
     chat_id: int = update.message.chat.id
     is_admin: bool = await check_admin(update, context)
     
     usr: Users = add_user_to_db(update, context)
+    
     session.add(usr)
+    session.add(current_group)
     
     if (update.message.text and not update.message.photo) or update.message.from_user.is_bot:  # If a message is plain text or it was sent from a bot
         spam_words: list = session.query(SpamWords).all()
@@ -356,8 +358,8 @@ async def check_spam(update, context):
     if usr.weight > current_group.max_messages:
         logging.info(f'trying to punish {update.message.from_user.username}')
         try:
-            if not check_admin(update, context):
-                await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user_id, until_date=int(time.time() + mute_duration * 60), permissions=None)
+            if not await check_admin(update, context):
+                await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user_id, until_date=int(time.time() + current_group.mute_duration * 60), permissions=None)
                 logging.info(f"muted {update.message.from_user.username} for {current_group.mute_duration} minutes")
             else:
                 logging.info(f"admin of a group tries to spam but he can't be muted :(")
