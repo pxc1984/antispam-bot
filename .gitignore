@@ -14,3 +14,6 @@ plan.md
 info.log
 error.log
 debug.log
+# Virtual environments
+.venv
+venv

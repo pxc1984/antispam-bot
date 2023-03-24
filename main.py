@@ -24,7 +24,7 @@ except Exception:
     # TRY VERY-VERY HARD
     os.system("pip install asyncio")
     import asyncio
-from data import db_session
+import data.db_session
 try:
     import sqlalchemy as sa
     import sqlalchemy.orm as orm
@@ -533,4 +533,5 @@ def main():
 
 if __name__ == '__main__':
     logging.info(db_session.global_init("db/spam_bot.db"))
+    print('SUCCESS')
     main()

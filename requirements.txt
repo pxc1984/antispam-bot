@@ -1,6 +1,4 @@
-[libraries]
-telegram
-telegram.ext
+python-telegram-bot
 pandas
 asyncio
 sqlalchemy
