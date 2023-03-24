@@ -5,3 +5,4 @@ pandas
 asyncio
 sqlalchemy
 translate
+schedule
