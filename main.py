@@ -1,3 +1,14 @@
+"""This code is made by Igor Mamaev (igor.mamaev1@gmail.com)
+I am happy to inform you that this code cannot be used in any commercial purposes, 
+only for education. 
+Everyone is allowed to contribute to this project as long as they don't fight over owner rights.
+Everyone can fork this project and begin working on it in private or to commit directly to this repository.
+
+The bot was working as @dushny_filter_bot
+
+I don't allow anyone to run this bot under another username!! You can read, edit, learn from this code, but you aren't allowed
+to execute it!"""
+
 import os
 """Don't worry about these goofy imports, 
 they are made to easily run my project on an alien cloud server 
@@ -5,7 +16,7 @@ without worrying about terminal and requirements.txt, but it will also present""
 try:
     from telegram.ext import *  # Updater, CommandHandler, MessageHandler, filters
     from telegram import *  # sendChatAction
-except Exception:
+except Exception as e:
     # Try harder
     os.system("pip install python-telegram-bot[ext] --upgrade")
     from telegram.ext import *
@@ -13,14 +24,14 @@ except Exception:
 import logging
 try:
     import pandas as pd
-except Exception:
+except Exception as e:
     # Try even harder
     os.system("pip install pandas")
     import pandas as pd
 import time
 try:
     import asyncio
-except Exception:
+except Exception as e:
     # TRY VERY-VERY HARD
     os.system("pip install asyncio")
     import asyncio
@@ -29,7 +40,7 @@ try:
     import sqlalchemy as sa
     import sqlalchemy.orm as orm
     import sqlalchemy.ext.declarative as dec
-except Exception:
+except Exception as e:
     # NHAHHHHH
     os.system("pip install sqlalchemy")
     import sqlalchemy as sa
@@ -125,8 +136,8 @@ logger.addHandler(debug_handler)
 logger.addHandler(error_handler)
 
 
-# Load configuration from a file "config.csv", this function is also loaded when a user is sending a .csv file to a bot in private. This is very vinurable, i know
 def load_config():
+    """Load configuration from a file "config.csv", this function is also loaded when a user is sending a .csv file to a bot in private. This is very vinurable, i know"""
     global config
     try:
         config = pd.read_csv('data/config.csv')
@@ -152,6 +163,15 @@ load_token()
 
 
 def translate_to_lang(update, message):
+    """This function translates a given message to a lanuage of an author. It is made to simplify interaction with my bot
+
+    Args:
+        update (Update): Class, that telegram provides me with, that contains full info about a message, including a user.
+        message (str): Firsthand message
+
+    Returns:
+        str: Translated message
+    """
     to_lang = update.message.from_user.language_code
     translt = Translator(to_lang)
     return translt.translate(str(message))
@@ -178,6 +198,7 @@ def add_user_to_db(update, context):
 
 
 def add_group_to_db(update, context):
+    """This function is created to simplify adding groups to db"""
     try:
         if update.message.chat.type != "private":
             session = db_session.create_session()
@@ -329,6 +350,11 @@ async def settings(update, context):
         
 
 async def config_update(update, context):  # nan -status
+    """This function provides me with an intresting function, used to setup bot correctly in all my groups
+
+    Returns:
+        int: exit code
+    """
     logging.info("begin")
     user_id: int = update.message.from_user.id
     chat_id: int = update.message.chat.id
@@ -426,6 +452,7 @@ async def third_response_config(update, context):  # 4 -status
 
 
 async def check_admin(update, context):
+    """Checks if a user, which has written this message was an admin or an Owner"""
     chat_member = await context.bot.get_chat_member(update.message.chat.id, update.message.from_user.id)
     if type(chat_member) in [ChatMemberAdministrator, ChatMemberOwner]:
         return True
@@ -463,6 +490,11 @@ def has_too_many_caps(text, threshold=0.7):
 
 
 async def check_spam(update, context):
+    """Main function, which is called when a user is using an ordinary message, not a command.
+
+    Returns:
+        int: exit code
+    """
     logging.info("check-spam")
     session = db_session.create_session()
     
@@ -470,7 +502,7 @@ async def check_spam(update, context):
     if update.message.chat.type == "private":  # User is writing in private -> I don't filter and just say him to add me to a group in order for me to work properly
         await start_command(update, context)
         logging.info("user was writing in private")
-        return 
+        return 0
 
     user_id: int = update.message.from_user.id
     chat_id: int = update.message.chat.id
@@ -534,6 +566,15 @@ async def check_spam(update, context):
 
 
 async def add_spam_word(update, context):
+    """This function will be called using /add_spam_word, it can only be used my myself:3
+
+    Args:
+        update (Update): Class, telegram provides me with, which has all the info about a message and a user
+        context (context_types): Class, which is used to interact with telegram
+
+    Returns:
+        int: exit code
+    """
     session = db_session.create_session()
     is_admin = await check_admin(update, context)
     if update.message.from_user.id != int(config['pro_id']) or update.effective_chat.type != "private":  # editing global config
@@ -574,30 +615,50 @@ async def load_json(update, context):
 
 
 def clear_weight():
+    """Function to clear weight after every minute, it is required in order for my bot to work as intended
+
+    Returns:
+        int: exit code, which describes, that everything went well
+    """
     logging.info("clearing weights")
-    
-    session = db_session.create_session()
-    all_users = session.query(Users).all()
-    
-    logging.info(len(all_users))
-    
-    for user in all_users:
-        user.weight = 0
-        logging.info(f"Set weight of {user.username} to {user.weight}")
-        # Add each user object to the session individually
-        session.add(user)
-    session.commit()
-    return 1
+    try:
+        session = db_session.create_session()
+        all_users = session.query(Users).all()
+        
+        logging.info(len(all_users))
+        
+        for user in all_users:
+            user.weight = 0
+            logging.info(f"Set weight of {user.username} to {user.weight}")
+            # Add each user object to the session individually
+            session.add(user)
+        session.commit()
+        return 1
+    except Exception as e:
+        logger.error(f"Clearing weight caused error: {e}")
+        return 0
 
 
 
 def clear_weight_process():
+    """This function is created for a single purpose: 
+        to leave off schedule, cuz it can't do anything with my needs"""
     while True:
         clear_weight()
+        # This will clear a very-very big file, named debug.log, which isn't very crucial during production phase
+        with open('debug.log', 'w'):
+            pass
+        # Wait a minute
         time.sleep(60)
 
 
 def error(update, context):
+    """There was an attempt to create a beautifull error encoder
+
+    Args:
+        update (Update): A param, which telegram provides me with
+        context (context_types): class, which is used to interact with a message
+    """
     logging.error('Update "%s" caused error "%s"', update, context.error)
 
 
@@ -656,5 +717,5 @@ def main():
 
 if __name__ == '__main__':
     logging.info(db_session.global_init("db/spam_bot.db"))
-    print('SUCCESS')
+    print('SUCCESS')  # This print is purely aestetic, I use it cuz I am working with docker using only Konsole :3
     main()
