@@ -52,6 +52,8 @@ import datetime
 import json
 import sys
 
+from multiprocessing import Process
+
 
 EMOJIS = """😁😂😃😄😅😆😉😊😋😌😍😏😒😓😔😖😘😚😜
 😝😞😠😡😢😣😤😥😨😩😪😫😭😰😱😲😳😵😷😸😹😺😻😼😽
@@ -484,9 +486,13 @@ async def check_spam(update, context):
         
         for spam_word in spam_words:
             if spam_word.word in update.message.text.lower().replace(',', ''). replace('.', '').replace(':', '').replace('!', '').replace('?', '').replace('/', ''):
-                await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)  # This is done in current chat
-                await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained spam and has been deleted."))  # This is done in private message to a user
-                await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, f"You better don't use word {spam_word.word}"))
+                # The following part of code is intended to use when a user has been spamming(advertising) in a group
+                try:
+                    await context.bot.delete_message(chat_id=update.message.chat.id, message_id=update.message.message_id)
+                    await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, "Your message contained spam and has been deleted."))  # This is done in private message to a user
+                    await context.bot.send_message(chat_id=update.message.from_user.id, text=translate_to_lang(update, f"You better don't use word {spam_word.word}"))
+                except Exception as e:
+                    logging.info("couldn't initiate conversation with spammer")
                 if not is_admin:
                     usr.weight += spam_word.weight
 
@@ -518,7 +524,11 @@ async def check_spam(update, context):
         except Exception as e:
             logging.info(e.__repr__())
             return 0
-        await context.bot.send_message(chat_id=user_id, text=translate_to_lang(update, "You have been muted for {} minutes for spamming. Please make sure to read the group rules and avoid sending too many messages in a single chat session.".format(current_group.mute_duration)))
+        try:
+            await context.bot.send_message(chat_id=user_id, text=translate_to_lang(update, "You have been muted for {} minutes for spamming. Please make sure to read the group rules and avoid sending too many messages in a single chat session.".format(current_group.mute_duration)))
+        except Exception as e:
+            logging.info("couldn't initiate conversation with user")
+    
     session.commit()
     return 1
 
@@ -564,13 +574,27 @@ async def load_json(update, context):
 
 
 def clear_weight():
+    logging.info("clearing weights")
+    
     session = db_session.create_session()
     all_users = session.query(Users).all()
-    session.add(all_users)
+    
+    logging.info(len(all_users))
+    
     for user in all_users:
         user.weight = 0
+        logging.info(f"Set weight of {user.username} to {user.weight}")
+        # Add each user object to the session individually
+        session.add(user)
     session.commit()
     return 1
+
+
+
+def clear_weight_process():
+    while True:
+        clear_weight()
+        time.sleep(60)
 
 
 def error(update, context):
@@ -620,13 +644,14 @@ def main():
         # MessageHandler(filters.ALL, error)
     ])
 
-    # Start the bot
-    application.run_polling()
+    p1 = Process(target=application.run_polling)
+    p1.start()
     
-    # Start removing weight
-    schedule.every(1).minutes.do(clear_weight)
+    p2 = Process(target=clear_weight_process)
+    p2.start()
     
-    
+    p1.join()
+    p2.join()
 
 
 if __name__ == '__main__':
